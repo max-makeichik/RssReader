@@ -1,2 +1,2 @@
 # RssReader
-Rss reader for android
+Rss reader for android using RxJava, Dagger 2, Retrofit, SQLBrite, MVP.
