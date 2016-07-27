@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="cardview_margin">5dp</dimen>
+    <dimen name="cardview_margin_side">8dp</dimen>
+
+    <dimen name="subscription_text_size">20sp</dimen>
+    <item name="subscription_line_spacing" type="dimen" format="float">1.6</item>
+    <dimen name="emoji_image_size">35dp</dimen>
+    <dimen name="subscription_textview_padding_bottom">10dp</dimen>
+    <dimen name="subscription_textview_padding_right">85dp</dimen>
+    <dimen name="subscription_textview_padding_right_marked">65dp</dimen>
+    <dimen name="subscription_textview_padding_left">25dp</dimen>
+
+</resources>

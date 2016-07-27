@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">Rss Reader</string>
+    <string name="title_activity_subscriptions">RssReader</string>
+
+    <string name="title_activity_posts" />
+    <string name="err_msg_no_connection">Нет интернета</string>
+
+</resources>
