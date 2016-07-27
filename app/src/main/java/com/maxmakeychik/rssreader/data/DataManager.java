@@ -6,6 +6,7 @@ import com.maxmakeychik.rssreader.data.local.DatabaseHelper;
 import com.maxmakeychik.rssreader.data.local.PreferencesHelper;
 import com.maxmakeychik.rssreader.data.model.Post;
 import com.maxmakeychik.rssreader.data.model.RssSubscription;
+import com.maxmakeychik.rssreader.data.model.rss.Channel;
 import com.maxmakeychik.rssreader.data.remote.ApiService;
 
 import java.util.List;
@@ -43,6 +44,18 @@ public class DataManager {
                 .doOnNext(posts -> Log.d(TAG, "posts " + posts))
                 .map(rssResponse -> rssResponse.channel.posts)
                 .flatMap(posts -> databaseHelper.setPosts(posts, rssSubscription.id));
+    }
+
+    public Observable<Channel> addRssSubscription(String url) {
+        return apiService.getPosts(url)
+                .map(rssResponse -> rssResponse.channel)
+                .doOnNext(channel -> Log.d(TAG, "channel " + channel))
+                .flatMap(channel -> databaseHelper.addSubscription(new RssSubscription(channel.title, url)))
+                .onErrorResumeNext(throwable -> databaseHelper.addSubscription(new RssSubscription(url)));
+    }
+
+    public Observable<Integer> removeRssSubscription(int id) {
+        return databaseHelper.removeSubscription(id);
     }
 
     public Observable<List<RssSubscription>> getSubscriptions() {

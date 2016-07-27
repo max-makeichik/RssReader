@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import com.maxmakeychik.rssreader.R;
 import com.maxmakeychik.rssreader.data.model.RssSubscription;
 import com.maxmakeychik.rssreader.util.ItemClickSupport;
+import com.maxmakeychik.rssreader.util.view.RecyclerViewEmptySupport;
 
 import org.parceler.Parcels;
 
@@ -31,7 +33,7 @@ public class RssSubscriptionsFragment extends Fragment {
     private static final String KEY_SONGS = "subscriptions";
 
     @BindView(R.id.subscriptions_list)
-    RecyclerView subscriptionsList;
+    RecyclerViewEmptySupport recyclerView;
     private Unbinder unbinder;
 
     private List<RssSubscription> rssSubscriptions;
@@ -55,7 +57,6 @@ public class RssSubscriptionsFragment extends Fragment {
         if(getArguments() != null){
             rssSubscriptions = Parcels.unwrap(getArguments().getParcelable(KEY_SONGS));
         }
-        Log.d(TAG, "onCreate: " + rssSubscriptions);
     }
 
     View view;
@@ -72,17 +73,52 @@ public class RssSubscriptionsFragment extends Fragment {
 
     private void setList() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        subscriptionsList.setLayoutManager(linearLayoutManager);
+        recyclerView.setLayoutManager(linearLayoutManager);
 
+        recyclerView.setEmptyView(view.findViewById(R.id.subscriptions_empty));
         rssRssSubscriptionsAdapter = new RssSubscriptionsAdapter(rssSubscriptions, getActivity());
-        subscriptionsList.setAdapter(rssRssSubscriptionsAdapter);
+        recyclerView.setAdapter(rssRssSubscriptionsAdapter);
 
-        ItemClickSupport.addTo(subscriptionsList).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                 ((RssSubscriptionsActivity) getActivity()).onRssSubscriptionClicked(rssSubscriptions.get(position));
             }
         });
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {    //  Remove swiped item from list and notify the RecyclerView
+                int subscriptionId = rssSubscriptions.get(viewHolder.getAdapterPosition()).id;
+                ((RssSubscriptionsActivity) getActivity()).removeRssSubscription(subscriptionId);
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    public void onSubscriptionRemoved(int id) {
+        Log.d(TAG, "onSubscriptionRemoved: " + id);
+        RssSubscription rssSubscriptionToRemove = null;
+        for (RssSubscription rssSubscription : rssSubscriptions) {
+            if (rssSubscription.id == id) {
+                rssSubscriptionToRemove = rssSubscription;
+                break;
+            }
+        }
+        if(rssSubscriptionToRemove == null) {
+            return;
+        }
+        Log.d(TAG, "onSubscriptionRemoved: " + rssSubscriptionToRemove);
+        int subscriptionIndex = rssSubscriptions.indexOf(rssSubscriptionToRemove);
+        rssSubscriptions.remove(rssSubscriptionToRemove);
+        rssRssSubscriptionsAdapter.notifyItemRemoved(subscriptionIndex);
+        rssRssSubscriptionsAdapter.notifyItemRangeChanged(subscriptionIndex, rssSubscriptions.size());
     }
 
     @Override

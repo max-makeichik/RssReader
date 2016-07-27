@@ -2,16 +2,16 @@ package com.maxmakeychik.rssreader.data.local;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import com.maxmakeychik.rssreader.injection.ApplicationContext;
-import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 import javax.inject.Inject;
 
-public class DbOpenHelper extends SQLiteAssetHelper {
+public class DbOpenHelper extends SQLiteOpenHelper {
 
-    public static final String DATABASE_NAME = "rss_reader.db";
-    private static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = "ribots.db";
+    public static final int DATABASE_VERSION = 2;
 
     @Inject
     public DbOpenHelper(@ApplicationContext Context context) {
@@ -19,9 +19,21 @@ public class DbOpenHelper extends SQLiteAssetHelper {
     }
 
     @Override
-    public void onOpen(SQLiteDatabase db) {
-        super.onOpen(db);
-        db.setForeignKeyConstraintsEnabled(true);
+    public void onCreate(SQLiteDatabase db) {
+        db.beginTransaction();
+        try {
+            //Uncomment line below if you want to enable foreign keys
+            db.execSQL("PRAGMA foreign_keys=ON;");
+            db.execSQL(Db.SubscriptionTable.CREATE);
+            db.execSQL(Db.SubscriptionTable.INSERT_1);
+            db.execSQL(Db.SubscriptionTable.INSERT_2);
+            db.execSQL(Db.SubscriptionTable.INSERT_3);
+            db.execSQL(Db.PostTable.CREATE);
+            //Add other tables here
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     @Override

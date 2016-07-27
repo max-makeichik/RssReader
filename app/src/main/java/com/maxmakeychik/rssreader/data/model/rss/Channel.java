@@ -1,6 +1,5 @@
 package com.maxmakeychik.rssreader.data.model.rss;
 
-import com.maxmakeychik.rssreader.data.model.ImageEntity;
 import com.maxmakeychik.rssreader.data.model.Post;
 
 import org.parceler.Parcel;
@@ -19,21 +18,14 @@ public class Channel {
 
     public Channel(){}
 
-    @Element(name = "image", required = false)
-    public ImageEntity imageEntity;
     @ElementList(inline = true, required = false)
     public List<Post> posts;
     @Element
     public String title;
 
-    public String getImageUrl() {
-        return imageEntity == null ? null : imageEntity.url;
-    }
-
     @Override
     public String toString() {
         return "RssResponse{" +
-                ", imageEntity=" + imageEntity +
                 ", title=" + title +
                 ", posts=" + posts +
                 '}';

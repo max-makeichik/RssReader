@@ -10,29 +10,26 @@ public class RssSubscription {
 
     public RssSubscription(){}
 
+    public RssSubscription(String url) {
+        this.url = url;
+    }
+
+    public RssSubscription(String title, String url) {
+        this.title = title;
+        this.url = url;
+    }
+
     public int id;
-    public String url;
-    public ImageEntity imageEntity;
     public String title;
+    public String url;
 
     @Override
     public String toString() {
-        return "Subscription{" +
+        return "\n" + "Subscription {" +
                 "id=" + id +
-                ", url='" + url + '\'' +
-                ", imageEntity='" + imageEntity + '\'' +
                 ", title='" + title + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 
-    public String getImageUrl() {
-        return imageEntity == null ? null : imageEntity.url;
-    }
-
-    public float getAspectRatio() {
-        if(imageEntity == null || imageEntity.width == 0) {
-            return 0;
-        }
-        return Math.max(imageEntity.width, imageEntity.height) / Math.min(imageEntity.width, imageEntity.height);
-    }
 }

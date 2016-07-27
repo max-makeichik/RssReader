@@ -71,7 +71,7 @@ public class PostsPresenter extends BasePresenter<PostsMvpView> {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG, "There was an error loading the posts.");
+                        Log.e(TAG, "There was an error loading the posts from network.");
                         getMvpView().showError();
                     }
 

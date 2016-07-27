@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.maxmakeychik.rssreader.data.model.Post;
 import com.maxmakeychik.rssreader.data.model.RssSubscription;
+import com.maxmakeychik.rssreader.data.model.rss.Channel;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 
@@ -27,6 +28,7 @@ public class DatabaseHelper {
     @Inject
     public DatabaseHelper(DbOpenHelper dbOpenHelper) {
         mDb = SqlBrite.create().wrapDatabaseHelper(dbOpenHelper, Schedulers.io());
+        //mDb.setLoggingEnabled(true);
     }
 
     public BriteDatabase getBriteDb() {
@@ -49,11 +51,9 @@ public class DatabaseHelper {
     }
 
     public Observable<Post> setPosts(List<Post> posts, int subscriptionId) {
-        Log.d(TAG, "setPosts");
         return Observable.create(new Observable.OnSubscribe<Post>() {
             @Override
             public void call(Subscriber<? super Post> subscriber) {
-                Log.d(TAG, "setPosts call");
                 if (subscriber.isUnsubscribed()) return;
                 BriteDatabase.Transaction transaction = mDb.newTransaction();
                 try {
@@ -63,9 +63,53 @@ public class DatabaseHelper {
                                 Db.PostTable.toContentValues(post),
                                 SQLiteDatabase.CONFLICT_REPLACE);
                         if (result >= 0) {
-                            //Log.d(TAG, "insert successful");
                             subscriber.onNext(post);
                         }
+                    }
+                    transaction.markSuccessful();
+                    subscriber.onCompleted();
+                } finally {
+                    transaction.end();
+                }
+            }
+        });
+    }
+
+    public Observable<Channel> addSubscription(RssSubscription rssSubscription) {
+        return Observable.create(new Observable.OnSubscribe<Channel>() {
+                                     @Override
+                                     public void call(Subscriber<? super Channel> subscriber) {
+                                         if (subscriber.isUnsubscribed()) return;
+                                         BriteDatabase.Transaction transaction = mDb.newTransaction();
+                                         try {
+                                             long result = mDb.insert(Db.SubscriptionTable.TABLE_NAME,
+                                                     Db.SubscriptionTable.toContentValues(rssSubscription),
+                                                     SQLiteDatabase.CONFLICT_REPLACE);
+                                             if (result >= 0) {
+                                                 subscriber.onNext(null);
+                                             }
+                                             transaction.markSuccessful();
+                                             subscriber.onCompleted();
+                                         } finally {
+                                             transaction.end();
+                                         }
+                                     }
+                                 }
+        );
+    }
+
+    public Observable<Integer> removeSubscription(int id) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(Subscriber<? super Integer> subscriber) {
+                if (subscriber.isUnsubscribed()) return;
+                BriteDatabase.Transaction transaction = mDb.newTransaction();
+                try {
+                    int result = mDb.delete(Db.SubscriptionTable.TABLE_NAME,
+                            Db.SubscriptionTable.COLUMN_ID + "=?",
+                            String.valueOf(id));
+                    if (result >= 0) {
+                        subscriber.onNext(id);
                     }
                     transaction.markSuccessful();
                     subscriber.onCompleted();

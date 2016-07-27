@@ -11,4 +11,5 @@ public interface RssSubscriptionsMvpView extends MvpView {
 
     void showError();
 
+    void onSubscriptionRemoved(int id);
 }
